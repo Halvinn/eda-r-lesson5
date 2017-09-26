@@ -16,7 +16,7 @@ head(pf.fc_by_age_gender)
 ```
 
 ```{r}
-ggplot(data = pf.fc_by_age_gender, aes(age, mean_friend_count))+
+ggplot(data = pf.fc_by_age_gender, aes(age, median_friend_count))+
   geom_line(aes(color = gender))
 ```
 ```{r}
@@ -32,5 +32,61 @@ head(pf.fc_by_age_gender.wide)
 ggplot(data = pf.fc_by_age_gender.wide, aes(age, female/male))+
   geom_line(color = 'orange')+
   geom_hline(yintercept = 1, linetype = 2)
+```
+
+```{r}
+pf$year_joined <-  2014 - ceiling(pf$tenure / 365)
+summary(pf$year_joined)
+table(pf$year_joined)
+```
+
+```{r}
+pf$year_joined.bucket <- cut(pf$year_joined, breaks = c(2004, 2009, 2011, 2012, 2014))
+summary(pf$year_joined.bucket)
+```
+
+```{r}
+## Median friend count across age-group cohorts.
+ggplot(data = subset(pf, !is.na(year_joined.bucket)), aes(age, friend_count))+
+  geom_line(aes(color = year_joined.bucket), stat = 'summary', fun.y = median)
+```
+
+```{r}
+## Average friend count for age-group cohorts.
+
+ggplot(data = subset(pf, !is.na(year_joined.bucket)), aes(age, friend_count))+
+  geom_line(aes(color = year_joined.bucket), stat = 'summary', fun.y = mean)+
+  geom_line(aes(y = friend_count), linetype = 2, stat = 'summary', fun.y = mean)
+
+```
+
+```{r}
+## Friending Rate
+friend_rate <- pf %>%
+  filter(tenure > 0)%>%
+  #group_by(year_joined.bucket) %>%
+  summarise(mean_friending_rate = mean(friend_count / tenure),
+            median_friending_rate = median(friend_count /tenure),
+            min_friending_rate = min(friend_count /tenure),
+            max_friendin_rate = max(friend_count / tenure))
+
+## Much easier way to accomplish the same as above
+
+with(subset(pf, tenure > 0), summary(friend_count / tenure))
+
+```
+
+```{r}
+# Line graph of mean of friendships_initiated per day (of tenure)
+# vs. tenure colored by year_joined.bucket.
+
+ggplot(data = subset(pf, tenure > 1), aes(tenure, friendships_initiated / tenure))+
+  geom_smooth(aes(color = year_joined.bucket))
+```
+
+```{r}
+yo <- read.csv('yogurt.csv')
+yo$id <- factor(yo$id)
+head(yo)
 ```
 
