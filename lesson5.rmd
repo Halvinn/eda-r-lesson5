@@ -1,0 +1,36 @@
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+pf <- read.csv('pseudo_facebook.tsv', sep = '\t')
+
+```{r}
+pf.fc_by_age_gender <- subset(pf, !is.na(gender)) %>%
+  group_by(age, gender) %>%
+  summarise(mean_friend_count = mean(friend_count),
+            median_friend_count = median(friend_count),
+            n = n()) %>%
+  ungroup() %>%
+  arrange(age)
+
+head(pf.fc_by_age_gender)
+```
+
+```{r}
+ggplot(data = pf.fc_by_age_gender, aes(age, mean_friend_count))+
+  geom_line(aes(color = gender))
+```
+```{r}
+library(tidyr)
+pf.fc_by_age_gender.wide <- dcast(pf.fc_by_age_gender,
+                                  age ~ gender,
+                                  value.var = 'median_friend_count')
+
+head(pf.fc_by_age_gender.wide)
+```
+
+```{r}
+ggplot(data = pf.fc_by_age_gender.wide, aes(age, female/male))+
+  geom_line(color = 'orange')+
+  geom_hline(yintercept = 1, linetype = 2)
+```
+
