@@ -90,6 +90,37 @@ yo$id <- factor(yo$id)
 head(yo)
 ```
 ```{r}
-qplot(data = yo, x = price)
+qplot(data = yo, x = price, fill = I('orange'))
+```
+```{r}
+## New variable all.purchases
+yo <- transform(yo, all.purchases = 
+                  strawberry + blueberry + pina.colada + plain + mixed.berry)
+head(yo)
+```
+
+```{r}
+ggplot(data = yo, aes(time, price))+
+         geom_point(alpha = 0.1, color = 'blue')
+```
+
+```{r}
+set.seed(3992)
+sample.ids <- sample(levels(yo$id), 16)
+
+ggplot(aes(time, price, color = id),
+  data = subset(yo, id %in% sample.ids))+
+  facet_wrap(~ id)+
+  geom_line()+
+  geom_point(aes(size = all.purchases), pch = 1)
+```
+```{r}
+install.packages('GGally')
+library(GGally)
+
+set.seed(2876)
+pf_subset <- pf[, c(2:15)]
+names(pf_subset)
+ggpairs(pf_subset[sample.int(nrow(pf_subset), 1000), ])
 ```
 
